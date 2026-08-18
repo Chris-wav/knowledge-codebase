@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Enums\BugStatus;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -32,7 +33,7 @@ class IndexProjectBugRequest extends FormRequest
             'status' => [
                 'string',
                 'nullable',
-                Rule::in(['open', 'in_progress', 'resolved']),
+                Rule::enum(BugStatus::class),
             ],
         ];
     }

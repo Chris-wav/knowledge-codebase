@@ -2,8 +2,10 @@
 
 namespace App\Http\Requests;
 
+use App\Enums\BugStatus;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class StoreBugRequest extends FormRequest
 {
@@ -28,7 +30,7 @@ class StoreBugRequest extends FormRequest
             'description' => ['nullable', 'string'],
             'cause' => ['nullable', 'string'],
             'solution' => ['nullable', 'string'],
-            'status' => ['required', 'string', 'max:255'],
+            'status' => ['required', 'string', Rule::enum(BugStatus::class)],
             'project_name' => ['nullable', 'string', 'max:255'],
             'technology' => ['nullable', 'string', 'max:255'],
         ];
