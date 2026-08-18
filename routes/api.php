@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\BugController;
+use App\Http\Controllers\ProjectBugController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\ProjectMemberController;
 use Illuminate\Support\Facades\Route;
@@ -21,5 +22,7 @@ Route::middleware('auth:sanctum')->group(function () {
             ->name('projects.members.index');
         Route::delete('members/{user}', [ProjectMemberController::class, 'destroy'])
             ->name('projects.members.destroy');
+        Route::get('bugs', [ProjectBugController::class, 'index'])
+            ->name('projects.bugs.index');
     });
 });
