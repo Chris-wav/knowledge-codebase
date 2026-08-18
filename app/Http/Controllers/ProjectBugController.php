@@ -14,7 +14,13 @@ class ProjectBugController extends Controller
     {
         Gate::authorize('view', $project);
 
-        $bugs = $project->bugs()->orderBy('title')->paginate(15);
+        $search = $request->query('search');
+        $query = $project->bugs();
+
+        if ($search) {
+            $query->where('title', 'like', '%'.$search.'%');
+        }
+        $bugs = $query->orderBy('title')->paginate(15);
 
         return BugResource::collection($bugs);
     }
