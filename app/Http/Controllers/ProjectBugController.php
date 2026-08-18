@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\IndexProjectBugRequest;
 use App\Http\Requests\StoreBugRequest;
 use App\Http\Resources\BugResource;
+use App\Models\Bug;
 use App\Models\Project;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
@@ -47,5 +48,14 @@ class ProjectBugController extends Controller
         return new BugResource($bug)
             ->response()
             ->setStatusCode(201);
+    }
+
+    public function show(Project $project, Bug $bug): BugResource
+    {
+        Gate::authorize('view', $project);
+
+        $projectBug = $project->bugs()->whereKey($bug->id)->firstOrFail();
+
+        return new BugResource($projectBug);
     }
 }
