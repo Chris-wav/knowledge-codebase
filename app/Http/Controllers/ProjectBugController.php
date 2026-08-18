@@ -3,9 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\IndexProjectBugRequest;
+use App\Http\Requests\StoreBugRequest;
 use App\Http\Resources\BugResource;
 use App\Models\Project;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 
 class ProjectBugController extends Controller
@@ -28,5 +31,21 @@ class ProjectBugController extends Controller
         $bugs = $query->orderBy('title')->paginate(15)->withQueryString();
 
         return BugResource::collection($bugs);
+    }
+
+    public function store(Project $project, StoreBugRequest $request): JsonResponse
+    {
+        Gate::authorize('createBug', $project);
+        $bugData = $request->validated();
+
+        $bug = DB::transaction(function () use ($project, $bugData) {
+            $bug = $project->bugs()->create($bugData);
+
+            return $bug;
+        });
+
+        return new BugResource($bug)
+            ->response()
+            ->setStatusCode(201);
     }
 }

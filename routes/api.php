@@ -24,5 +24,7 @@ Route::middleware('auth:sanctum')->group(function () {
             ->name('projects.members.destroy');
         Route::get('bugs', [ProjectBugController::class, 'index'])
             ->name('projects.bugs.index');
+        Route::post('bugs', [ProjectBugController::class, 'store'])
+            ->name('projects.bugs.store');
     });
 });

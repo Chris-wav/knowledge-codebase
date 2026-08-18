@@ -65,4 +65,12 @@ class ProjectPolicy
             ->wherePivot('role', 'owner')
             ->exists();
     }
+
+    /**
+     * Determine if the user is part of the project and can create a bug.
+     */
+    public function createBug(User $user, Project $project): bool
+    {
+        return $project->users()->whereKey($user->id)->exists();
+    }
 }

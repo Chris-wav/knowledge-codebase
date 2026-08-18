@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\BugStatus;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
@@ -23,5 +24,12 @@ class Bug extends Model
     public function projects(): BelongsToMany
     {
         return $this->belongsToMany(Project::class)->withTimestamps();
+    }
+
+    protected function casts(): array
+    {
+        return [
+            'status' => BugStatus::class,
+        ];
     }
 }
