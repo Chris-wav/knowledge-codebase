@@ -4,6 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class IndexProjectBugRequest extends FormRequest
 {
@@ -23,7 +24,16 @@ class IndexProjectBugRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'search' => ['string', 'nullable', 'max:100'],
+            'search' => [
+                'string',
+                'nullable',
+                'max:100',
+            ],
+            'status' => [
+                'string',
+                'nullable',
+                Rule::in(['open', 'in_progress', 'resolved']),
+            ],
         ];
     }
 }

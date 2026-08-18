@@ -16,6 +16,11 @@ class ProjectBugController extends Controller
 
         $search = $request->validated('search');
         $query = $project->bugs();
+        $status = $request->validated('status');
+
+        if ($status) {
+            $query->where('status', $status);
+        }
 
         if ($search) {
             $query->where('title', 'like', '%'.$search.'%');
