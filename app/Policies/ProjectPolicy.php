@@ -66,11 +66,21 @@ class ProjectPolicy
             ->exists();
     }
 
+    private function isPartOfTheProject(User $user, Project $project)
+    {
+        return $project->users()->whereKey($user->id)->exists();
+    }
+
     /**
      * Determine if the user is part of the project and can create a bug.
      */
     public function createBug(User $user, Project $project): bool
     {
-        return $project->users()->whereKey($user->id)->exists();
+        return $this->isPartOfTheProject($user, $project);
+    }
+
+    public function updateBug(User $user, Project $project): bool
+    {
+        return $this->isPartOfTheProject($user, $project);
     }
 }

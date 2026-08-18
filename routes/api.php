@@ -28,5 +28,7 @@ Route::middleware('auth:sanctum')->group(function () {
             ->name('projects.bugs.store');
         Route::get('bugs/{bug}', [ProjectBugController::class, 'show'])
             ->name('projects.bugs.show');
+        Route::patch('bugs/{bug}', [ProjectBugController::class, 'update'])
+            ->name('projects.bugs.update');
     });
 });

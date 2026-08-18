@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\IndexProjectBugRequest;
 use App\Http\Requests\StoreBugRequest;
+use App\Http\Requests\UpdateBugRequest;
 use App\Http\Resources\BugResource;
 use App\Models\Bug;
 use App\Models\Project;
@@ -57,5 +58,18 @@ class ProjectBugController extends Controller
         $projectBug = $project->bugs()->whereKey($bug->id)->firstOrFail();
 
         return new BugResource($projectBug);
+    }
+
+    public function update(Project $project, UpdateBugRequest $request, Bug $bug)
+    {
+        Gate::authorize('updateBug', $project);
+
+        $bugData = $request->validated();
+
+        $bugToUpdate = $project->bugs()->whereKey($bug->id)->firstOrFail();
+
+        $bugToUpdate->update($bugData);
+
+        return new BugResource($bugToUpdate);
     }
 }
