@@ -1,5 +1,10 @@
 @import 'tailwindcss';
 
+a[href],
+button:not(:disabled) {
+    cursor: pointer;
+}
+
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 @source '../../storage/framework/views/*.php';
 
