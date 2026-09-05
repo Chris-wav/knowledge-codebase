@@ -1,4 +1,4 @@
-import { Head } from '@inertiajs/react';
+import { Head, Link } from '@inertiajs/react';
 import type { DashboardProps } from '@/types/dashboardProps';
 
 export default function Dashboard({ projects }: DashboardProps) {
@@ -53,7 +53,8 @@ export default function Dashboard({ projects }: DashboardProps) {
                     {projectCount > 0 ? (
                         <section className="grid gap-4 pb-12 sm:grid-cols-2 lg:grid-cols-3" aria-label="Projects">
                             {projects.data.map((project) => (
-                                <article
+                                <Link
+                                    href={`/project/${project.slug}`}
                                     key={project.id}
                                     className="group flex min-h-60 cursor-pointer flex-col rounded-3xl border border-[#deded8] bg-white p-6 shadow-[0_14px_35px_rgba(49,58,52,0.05)] transition duration-200 hover:-translate-y-1 hover:border-[#c8d8cb] hover:shadow-[0_20px_45px_rgba(49,58,52,0.09)]"
                                 >
@@ -79,7 +80,7 @@ export default function Dashboard({ projects }: DashboardProps) {
                                             →
                                         </span>
                                     </div>
-                                </article>
+                                </Link>
                             ))}
                         </section>
                     ) : (
