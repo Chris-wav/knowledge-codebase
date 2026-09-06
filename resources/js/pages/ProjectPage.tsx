@@ -1,4 +1,6 @@
-import { Head } from '@inertiajs/react';
+import { Head, router } from '@inertiajs/react';
+import { useState } from 'react';
+import BugForm from '@/components/BugForm';
 import BugCard from '@/components/BugCard';
 import type { Project } from '@/types/project';
 
@@ -9,6 +11,7 @@ interface ProjectPageProps {
 }
 
 export default function ProjectPage({ project }: ProjectPageProps) {
+    const [showBugForm, setShowBugForm] = useState(false);
     const projectData = project.data;
     const initials = projectData.name.slice(0, 2).toUpperCase();
 
@@ -66,15 +69,35 @@ export default function ProjectPage({ project }: ProjectPageProps) {
                         </div>
                     </section>
 
+                    {showBugForm && (
+                        <div className="mb-6">
+                            <BugForm
+                                projectSlug={projectData.slug}
+                                onCancel={() => setShowBugForm(false)}
+                                onCreated={() => {
+                                    setShowBugForm(false);
+                                    router.reload({ only: ['project'] });
+                                }}
+                            />
+                        </div>
+                    )}
+
                     <section className="rounded-3xl border border-[#deded8] bg-white p-6 shadow-[0_14px_35px_rgba(49,58,52,0.05)] sm:p-8">
-                        <div className="flex items-center justify-between gap-4 border-b border-[#efeee9] pb-5">
+                        <div className="flex flex-col gap-4 border-b border-[#efeee9] pb-5 sm:flex-row sm:items-center sm:justify-between">
                             <div>
                                 <p className="text-xs font-semibold tracking-[0.16em] text-[#78917e] uppercase">Workspace</p>
                                 <h2 className="mt-2 text-2xl font-semibold tracking-[-0.03em]">Project bugs</h2>
                             </div>
-                            <span className="rounded-full bg-[#f4f1ea] px-3 py-1.5 text-xs font-medium text-[#6e6a5d]">
-                                {projectData.bugs_count} tracked
-                            </span>
+                            <div className="flex items-center gap-3">
+                                <span className="rounded-full bg-[#f4f1ea] px-3 py-1.5 text-xs font-medium text-[#6e6a5d]">
+                                    {projectData.bugs_count} tracked
+                                </span>
+                                {!showBugForm && (
+                                    <button type="button" onClick={() => setShowBugForm(true)} className="rounded-xl bg-[#9fbea6] px-4 py-2 text-sm font-semibold text-[#233329] transition hover:bg-[#90b198]">
+                                        New bug
+                                    </button>
+                                )}
+                            </div>
                         </div>
 
                         {projectData.bugs.length > 0 ? (
