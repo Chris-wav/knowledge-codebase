@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\User;
+use App\Models\Project;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -20,6 +21,14 @@ class DatabaseSeeder extends Seeder
             [
                 'name' => 'Test User',
                 'password' => 'password',
+            ],
+        );
+
+        Project::query()->firstOrCreate(
+            ['slug' => 'bugvault-api'],
+            [
+                'name' => 'BugVault API',
+                'description' => 'Internal company bug knowledge base.',
             ],
         );
 

@@ -1,4 +1,5 @@
 import { Head } from '@inertiajs/react';
+import BugCard from '@/components/BugCard';
 import type { Project } from '@/types/project';
 
 interface ProjectPageProps {
@@ -76,15 +77,23 @@ export default function ProjectPage({ project }: ProjectPageProps) {
                             </span>
                         </div>
 
-                        <div className="grid min-h-64 place-items-center py-10 text-center">
-                            <div className="max-w-md">
-                                <div className="mx-auto grid size-14 place-items-center rounded-2xl bg-[#e8f0e7] text-xl text-[#57765f]">✦</div>
-                                <h3 className="mt-5 text-xl font-semibold tracking-[-0.025em]">Your bug workspace is ready</h3>
-                                <p className="mt-3 text-sm leading-6 text-[#70787d]">
-                                    The project overview is connected. Bug cards will appear here when the project bug data is included in the page response.
-                                </p>
+                        {projectData.bugs.length > 0 ? (
+                            <div className="grid gap-4 pt-6 md:grid-cols-2">
+                                {projectData.bugs.map((bug) => (
+                                    <BugCard key={bug.id} bug={bug} projectSlug={projectData.slug} />
+                                ))}
                             </div>
-                        </div>
+                        ) : (
+                            <div className="grid min-h-64 place-items-center py-10 text-center">
+                                <div className="max-w-md">
+                                    <div className="mx-auto grid size-14 place-items-center rounded-2xl bg-[#e8f0e7] text-xl text-[#57765f]">✦</div>
+                                    <h3 className="mt-5 text-xl font-semibold tracking-[-0.025em]">No bugs tracked yet</h3>
+                                    <p className="mt-3 text-sm leading-6 text-[#70787d]">
+                                        This project is ready for its first bug record.
+                                    </p>
+                                </div>
+                            </div>
+                        )}
                     </section>
                 </div>
             </main>

@@ -15,6 +15,7 @@ class ProjectPageController extends Controller
             ->projects()
             ->where('slug', $request->route('project'))
             ->withCount('bugs')
+            ->with('bugs')
             ->firstOrFail();
 
         return Inertia::render('ProjectPage', [

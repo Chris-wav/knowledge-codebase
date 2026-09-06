@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\Bug;
+use App\Models\Project;
 use Illuminate\Database\Seeder;
 
 class BugSeeder extends Seeder
@@ -65,11 +66,21 @@ class BugSeeder extends Seeder
             ],
         ];
 
+        $bugIds = [];
+
         foreach ($bugRecords as $bug) {
-            Bug::updateOrCreate(
+            $record = Bug::updateOrCreate(
                 ['title' => $bug['title']],
                 $bug,
             );
+
+            $bugIds[] = $record->id;
+        }
+
+        $project = Project::where('slug', 'bugvault-api')->first();
+
+        if ($project) {
+            $project->bugs()->syncWithoutDetaching($bugIds);
         }
     }
 }
