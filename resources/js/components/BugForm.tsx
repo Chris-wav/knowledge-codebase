@@ -1,4 +1,5 @@
 import { useState, type ChangeEvent, type FormEvent } from 'react';
+import type { Bug } from '@/types/bug';
 
 type BugStatus = 'open' | 'in_progress' | 'resolved';
 
@@ -15,11 +16,13 @@ type BugFormData = {
 
 interface BugFormProps {
     projectSlug: string;
+    mode?: 'create' | 'edit';
+    bug?: Bug;
     onCancel: () => void;
-    onCreated: () => void;
+    onSaved: () => void;
 }
 
-const initialFormData: BugFormData = {
+const emptyFormData: BugFormData = {
     title: '',
     error_message: '',
     description: '',
@@ -30,11 +33,29 @@ const initialFormData: BugFormData = {
     technology: '',
 };
 
-export default function BugForm({ projectSlug, onCancel, onCreated }: BugFormProps) {
-    const [formData, setFormData] = useState<BugFormData>(initialFormData);
+function formDataFromBug(bug?: Bug): BugFormData {
+    if (!bug) {
+        return emptyFormData;
+    }
+
+    return {
+        title: bug.title,
+        error_message: bug.error_message ?? '',
+        description: bug.description ?? '',
+        cause: bug.cause ?? '',
+        solution: bug.solution ?? '',
+        status: bug.status,
+        project_name: bug.project_name ?? '',
+        technology: bug.technology ?? '',
+    };
+}
+
+export default function BugForm({ projectSlug, mode = 'create', bug, onCancel, onSaved }: BugFormProps) {
+    const [formData, setFormData] = useState<BugFormData>(() => formDataFromBug(bug));
     const [errors, setErrors] = useState<Record<string, string[]>>({});
     const [requestError, setRequestError] = useState('');
     const [processing, setProcessing] = useState(false);
+    const isEditing = mode === 'edit';
 
     const handleChange = (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         const { name, value } = event.target;
@@ -49,9 +70,11 @@ export default function BugForm({ projectSlug, onCancel, onCreated }: BugFormPro
         setErrors({});
         setRequestError('');
 
+        const endpoint = isEditing ? `/api/projects/${projectSlug}/bugs/${bug?.id}` : `/api/projects/${projectSlug}/bugs`;
+
         try {
-            const response = await fetch(`/api/projects/${projectSlug}/bugs`, {
-                method: 'POST',
+            const response = await fetch(endpoint, {
+                method: isEditing ? 'PATCH' : 'POST',
                 credentials: 'same-origin',
                 headers: { Accept: 'application/json', 'Content-Type': 'application/json' },
                 body: JSON.stringify(formData),
@@ -64,12 +87,11 @@ export default function BugForm({ projectSlug, onCancel, onCreated }: BugFormPro
             }
 
             if (!response.ok) {
-                setRequestError(payload?.message ?? 'The bug could not be created.');
+                setRequestError(payload?.message ?? `The bug could not be ${isEditing ? 'updated' : 'created'}.`);
                 return;
             }
 
-            setFormData(initialFormData);
-            onCreated();
+            onSaved();
         } catch {
             setRequestError('Could not connect to the server. Please try again.');
         } finally {
@@ -80,8 +102,8 @@ export default function BugForm({ projectSlug, onCancel, onCreated }: BugFormPro
     return (
         <section className="rounded-3xl border border-[#deded8] bg-white p-6 shadow-[0_14px_35px_rgba(49,58,52,0.05)] sm:p-8">
             <div className="border-b border-[#efeee9] pb-6">
-                <p className="text-xs font-semibold tracking-[0.16em] text-[#78917e] uppercase">New record</p>
-                <h2 className="mt-2 text-2xl font-semibold tracking-[-0.03em]">Document a bug</h2>
+                <p className="text-xs font-semibold tracking-[0.16em] text-[#78917e] uppercase">{isEditing ? 'Update record' : 'New record'}</p>
+                <h2 className="mt-2 text-2xl font-semibold tracking-[-0.03em]">{isEditing ? 'Edit bug' : 'Document a bug'}</h2>
                 <p className="mt-2 max-w-xl text-sm leading-6 text-[#70787d]">Capture the context behind an issue so the next fix is easier to find.</p>
             </div>
 
@@ -106,7 +128,7 @@ export default function BugForm({ projectSlug, onCancel, onCreated }: BugFormPro
                 <div className="flex flex-col-reverse gap-3 border-t border-[#efeee9] pt-6 sm:flex-row sm:justify-end">
                     <button type="button" onClick={onCancel} className="h-11 rounded-xl px-5 text-sm font-medium text-[#6f777c] transition hover:bg-[#f4f4ef]">Cancel</button>
                     <button type="submit" disabled={processing} className="h-11 rounded-xl bg-[#9fbea6] px-5 text-sm font-semibold text-[#233329] transition hover:bg-[#90b198] disabled:cursor-not-allowed disabled:opacity-60">
-                        {processing ? 'Saving…' : 'Save bug'}
+                        {processing ? 'Saving…' : isEditing ? 'Update bug' : 'Save bug'}
                     </button>
                 </div>
             </form>

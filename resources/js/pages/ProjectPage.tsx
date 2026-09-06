@@ -74,7 +74,7 @@ export default function ProjectPage({ project }: ProjectPageProps) {
                             <BugForm
                                 projectSlug={projectData.slug}
                                 onCancel={() => setShowBugForm(false)}
-                                onCreated={() => {
+                                onSaved={() => {
                                     setShowBugForm(false);
                                     router.reload({ only: ['project'] });
                                 }}

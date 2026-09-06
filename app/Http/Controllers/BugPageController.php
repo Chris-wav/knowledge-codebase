@@ -15,7 +15,8 @@ class BugPageController extends Controller
         $bug = $project->bugs()->where('id', $request->route('bug'))->firstOrFail();
 
         return Inertia::render('BugPage', [
-            'bug' => new BugResource($bug)
+            'bug' => new BugResource($bug),
+            'project_slug' => $project->slug,
         ]);
     }
 }

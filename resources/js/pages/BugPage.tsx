@@ -1,10 +1,14 @@
 import { Head, Link } from '@inertiajs/react';
+import { useState } from 'react';
+import { router } from '@inertiajs/react';
+import BugForm from '@/components/BugForm';
 import type { Bug } from '@/types/bug';
 
 interface BugPageProps {
     bug: {
         data: Bug;
     };
+    project_slug: string;
 }
 
 const statusStyles = {
@@ -19,7 +23,8 @@ const statusLabels = {
     resolved: 'Resolved',
 } as const;
 
-export default function BugPage({ bug: bugResource }: BugPageProps) {
+export default function BugPage({ bug: bugResource, project_slug }: BugPageProps) {
+    const [showEditForm, setShowEditForm] = useState(false);
     const bug = bugResource.data;
 
     return (
@@ -52,21 +57,43 @@ export default function BugPage({ bug: bugResource }: BugPageProps) {
                                     <p className="text-xs font-semibold tracking-[0.16em] text-[#78917e] uppercase">Bug detail</p>
                                     <h1 className="mt-3 text-3xl font-semibold tracking-[-0.04em] sm:text-4xl">{bug.title}</h1>
                                 </div>
-                                <span className={`rounded-full px-3 py-1.5 text-xs font-semibold ${statusStyles[bug.status]}`}>
-                                    {statusLabels[bug.status]}
-                                </span>
+                                <div className="flex items-center gap-3">
+                                    <span className={`rounded-full px-3 py-1.5 text-xs font-semibold ${statusStyles[bug.status]}`}>
+                                        {statusLabels[bug.status]}
+                                    </span>
+                                    {!showEditForm && (
+                                        <button type="button" onClick={() => setShowEditForm(true)} className="rounded-xl bg-[#9fbea6] px-4 py-2 text-sm font-semibold text-[#233329] transition hover:bg-[#90b198]">
+                                            Edit bug
+                                        </button>
+                                    )}
+                                </div>
                             </div>
 
                             {bug.technology && (
                                 <p className="mt-4 text-sm font-medium text-[#78917e]">{bug.technology}</p>
                             )}
 
-                            <div className="mt-8 grid gap-5 sm:grid-cols-2">
-                                <InfoBlock label="Error message" value={bug.error_message} />
-                                <InfoBlock label="Description" value={bug.description} />
-                                <InfoBlock label="Cause" value={bug.cause} />
-                                <InfoBlock label="Solution" value={bug.solution} />
-                            </div>
+                            {showEditForm ? (
+                                <div className="mt-8">
+                                    <BugForm
+                                        projectSlug={project_slug}
+                                        mode="edit"
+                                        bug={bug}
+                                        onCancel={() => setShowEditForm(false)}
+                                        onSaved={() => {
+                                            setShowEditForm(false);
+                                            router.reload();
+                                        }}
+                                    />
+                                </div>
+                            ) : (
+                                <div className="mt-8 grid gap-5 sm:grid-cols-2">
+                                    <InfoBlock label="Error message" value={bug.error_message} />
+                                    <InfoBlock label="Description" value={bug.description} />
+                                    <InfoBlock label="Cause" value={bug.cause} />
+                                    <InfoBlock label="Solution" value={bug.solution} />
+                                </div>
+                            )}
                         </div>
                     </section>
                 </div>
