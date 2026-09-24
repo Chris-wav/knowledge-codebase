@@ -83,4 +83,9 @@ class ProjectPolicy
     {
         return $this->isPartOfTheProject($user, $project);
     }
+
+    public function deleteBug(User $user, Project $project): bool
+    {
+        return $this->isPartOfTheProject($user, $project);
+    }
 }

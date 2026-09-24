@@ -72,4 +72,14 @@ class ProjectBugController extends Controller
 
         return new BugResource($bugToUpdate);
     }
+
+    public function destroy(Project $project, Bug $bug): JsonResponse
+    {
+        Gate::authorize('deleteBug', $project);
+
+        $bugToDelete = $project->bugs()->whereKey($bug->id)->firstOrFail();
+        $bugToDelete->delete();
+
+        return response()->json(null, 204);
+    }
 }

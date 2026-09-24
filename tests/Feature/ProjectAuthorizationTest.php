@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\Project;
+use App\Models\Bug;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -107,6 +108,35 @@ class ProjectAuthorizationTest extends TestCase
             ->assertJsonCount(1, 'data')
             ->assertJsonPath('data.0.id', $this->project->id)
             ->assertJsonMissing(['id' => $otherProject->id]);
+    }
+
+    public function test_project_member_can_delete_a_bug_from_the_project(): void
+    {
+        $bug = Bug::create([
+            'title' => 'Bug to delete',
+            'status' => 'open',
+        ]);
+        $this->project->bugs()->attach($bug->id);
+
+        $this->actingAs($this->member)
+            ->deleteJson('/api/projects/'.$this->project->slug.'/bugs/'.$bug->id)
+            ->assertNoContent();
+
+        $this->assertDatabaseMissing('bug', ['id' => $bug->id]);
+        $this->assertDatabaseMissing('bug_project', ['bug_id' => $bug->id]);
+    }
+
+    public function test_only_owner_can_delete_project(): void
+    {
+        $this->actingAs($this->member)
+            ->deleteJson($this->projectEndpoint())
+            ->assertForbidden();
+
+        $this->actingAs($this->owner)
+            ->deleteJson($this->projectEndpoint())
+            ->assertNoContent();
+
+        $this->assertDatabaseMissing('projects', ['id' => $this->project->id]);
     }
 
     private function projectEndpoint(): string

@@ -82,4 +82,17 @@ class ProjectController extends Controller
 
         return new ProjectResource($project);
     }
+
+    public function destroy(Project $project): JsonResponse
+    {
+        Gate::authorize('delete', $project);
+
+        DB::transaction(function () use ($project): void {
+            $project->users()->detach();
+            $project->bugs()->detach();
+            $project->delete();
+        });
+
+        return response()->json(null, 204);
+    }
 }

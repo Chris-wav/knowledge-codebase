@@ -13,7 +13,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('bugs', BugController::class)->except('destroy');
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/user', [AuthController::class, 'user']);
-    Route::apiResource('projects', ProjectController::class)->except('destroy');
+    Route::apiResource('projects', ProjectController::class);
 
     Route::prefix('projects/{project}')->group(function () {
         Route::post('members', [ProjectMemberController::class, 'store'])
@@ -30,5 +30,7 @@ Route::middleware('auth:sanctum')->group(function () {
             ->name('projects.bugs.show');
         Route::patch('bugs/{bug}', [ProjectBugController::class, 'update'])
             ->name('projects.bugs.update');
+        Route::delete('bugs/{bug}', [ProjectBugController::class, 'destroy'])
+            ->name('projects.bugs.destroy');
     });
 });

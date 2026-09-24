@@ -1,7 +1,10 @@
-import { Head, Link } from '@inertiajs/react';
+import { Head, Link, router } from '@inertiajs/react';
+import { useState } from 'react';
+import ProjectForm from '@/components/ProjectForm';
 import type { DashboardProps } from '@/types/dashboardProps';
 
 export default function Dashboard({ projects }: DashboardProps) {
+    const [showProjectForm, setShowProjectForm] = useState(false);
     const projectCount = projects.data.length;
 
     return (
@@ -21,10 +24,7 @@ export default function Dashboard({ projects }: DashboardProps) {
                             </div>
                         </div>
 
-                        <div className="hidden items-center gap-2 rounded-full border border-[#dce5df] bg-[#f0f6f1] px-3 py-1.5 text-xs font-medium text-[#52725a] sm:flex">
-                            <span className="size-1.5 rounded-full bg-[#80ae8b]" />
-                            All systems clear
-                        </div>
+                        <button type="button" onClick={() => setShowProjectForm(true)} className="rounded-xl bg-[#9fbea6] px-4 py-2 text-sm font-semibold text-[#233329] transition hover:bg-[#90b198]">New project</button>
                     </header>
 
                     <section className="flex flex-col gap-6 py-10 sm:flex-row sm:items-end sm:justify-between sm:py-14">
@@ -49,6 +49,16 @@ export default function Dashboard({ projects }: DashboardProps) {
                             </div>
                         </div>
                     </section>
+
+                    {showProjectForm && (
+                        <ProjectForm
+                            onCancel={() => setShowProjectForm(false)}
+                            onSaved={() => {
+                                setShowProjectForm(false);
+                                router.reload({ only: ['projects'] });
+                            }}
+                        />
+                    )}
 
                     {projectCount > 0 ? (
                         <section className="grid gap-4 pb-12 sm:grid-cols-2 lg:grid-cols-3" aria-label="Projects">

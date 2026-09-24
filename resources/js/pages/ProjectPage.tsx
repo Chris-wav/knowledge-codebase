@@ -2,6 +2,8 @@ import { Head, router } from '@inertiajs/react';
 import { useState } from 'react';
 import BugForm from '@/components/BugForm';
 import BugCard from '@/components/BugCard';
+import ProjectForm from '@/components/ProjectForm';
+import MembersPanel from '@/components/MembersPanel';
 import type { Project } from '@/types/project';
 
 interface ProjectPageProps {
@@ -12,8 +14,16 @@ interface ProjectPageProps {
 
 export default function ProjectPage({ project }: ProjectPageProps) {
     const [showBugForm, setShowBugForm] = useState(false);
+    const [showProjectForm, setShowProjectForm] = useState(false);
+    const [deleting, setDeleting] = useState(false);
+    const [search, setSearch] = useState('');
+    const [status, setStatus] = useState('all');
     const projectData = project.data;
     const initials = projectData.name.slice(0, 2).toUpperCase();
+    const filteredBugs = projectData.bugs.filter((bug) => {
+        const matchesSearch = `${bug.title} ${bug.description ?? ''} ${bug.error_message ?? ''}`.toLowerCase().includes(search.toLowerCase());
+        return matchesSearch && (status === 'all' || bug.status === status);
+    });
 
     return (
         <>
@@ -66,8 +76,20 @@ export default function ProjectPage({ project }: ProjectPageProps) {
                                     <p className="mt-0.5 text-xs text-[#7a8280]">Across this project</p>
                                 </div>
                             </div>
+                            <div className="flex gap-2">
+                                <button type="button" onClick={() => setShowProjectForm(true)} className="rounded-xl border border-[#d8dfd9] bg-white px-4 py-2 text-sm font-medium text-[#587260]">Edit</button>
+                                <button type="button" disabled={deleting} onClick={async () => {
+                                    if (!window.confirm('Delete this project and its links?')) return;
+                                    setDeleting(true);
+                                    const response = await fetch(`/api/projects/${projectData.slug}`, { method: 'DELETE', credentials: 'same-origin', headers: { Accept: 'application/json' } });
+                                    if (response.ok) router.visit('/');
+                                    setDeleting(false);
+                                }} className="rounded-xl bg-[#f8e9e5] px-4 py-2 text-sm font-medium text-[#a45e51] disabled:opacity-60">{deleting ? 'Deleting…' : 'Delete'}</button>
+                            </div>
                         </div>
                     </section>
+
+                    {showProjectForm && <ProjectForm project={projectData} mode="edit" onCancel={() => setShowProjectForm(false)} onSaved={() => { setShowProjectForm(false); router.reload({ only: ['project'] }); }} />}
 
                     {showBugForm && (
                         <div className="mb-6">
@@ -100,9 +122,14 @@ export default function ProjectPage({ project }: ProjectPageProps) {
                             </div>
                         </div>
 
-                        {projectData.bugs.length > 0 ? (
+                        <div className="flex flex-col gap-3 pt-5 sm:flex-row">
+                            <input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search bugs…" className="h-11 flex-1 rounded-xl border border-[#d7d9d4] bg-[#fbfbf8] px-4 text-sm outline-none focus:border-[#87a88e]" />
+                            <select value={status} onChange={(event) => setStatus(event.target.value)} className="h-11 rounded-xl border border-[#d7d9d4] bg-[#fbfbf8] px-4 text-sm outline-none focus:border-[#87a88e]"><option value="all">All statuses</option><option value="open">Open</option><option value="in_progress">In progress</option><option value="resolved">Resolved</option></select>
+                        </div>
+
+                        {filteredBugs.length > 0 ? (
                             <div className="grid gap-4 pt-6 md:grid-cols-2">
-                                {projectData.bugs.map((bug) => (
+                                {filteredBugs.map((bug) => (
                                     <BugCard key={bug.id} bug={bug} projectSlug={projectData.slug} />
                                 ))}
                             </div>
@@ -110,7 +137,7 @@ export default function ProjectPage({ project }: ProjectPageProps) {
                             <div className="grid min-h-64 place-items-center py-10 text-center">
                                 <div className="max-w-md">
                                     <div className="mx-auto grid size-14 place-items-center rounded-2xl bg-[#e8f0e7] text-xl text-[#57765f]">✦</div>
-                                    <h3 className="mt-5 text-xl font-semibold tracking-[-0.025em]">No bugs tracked yet</h3>
+                                    <h3 className="mt-5 text-xl font-semibold tracking-[-0.025em]">{projectData.bugs.length ? 'No matching bugs' : 'No bugs tracked yet'}</h3>
                                     <p className="mt-3 text-sm leading-6 text-[#70787d]">
                                         This project is ready for its first bug record.
                                     </p>
@@ -118,6 +145,7 @@ export default function ProjectPage({ project }: ProjectPageProps) {
                             </div>
                         )}
                     </section>
+                    <MembersPanel projectSlug={projectData.slug} />
                 </div>
             </main>
         </>

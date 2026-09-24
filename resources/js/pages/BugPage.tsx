@@ -1,6 +1,5 @@
-import { Head, Link } from '@inertiajs/react';
+import { Head, Link, router } from '@inertiajs/react';
 import { useState } from 'react';
-import { router } from '@inertiajs/react';
 import BugForm from '@/components/BugForm';
 import type { Bug } from '@/types/bug';
 
@@ -25,7 +24,38 @@ const statusLabels = {
 
 export default function BugPage({ bug: bugResource, project_slug }: BugPageProps) {
     const [showEditForm, setShowEditForm] = useState(false);
+    const [deleting, setDeleting] = useState(false);
+    const [deleteError, setDeleteError] = useState('');
     const bug = bugResource.data;
+
+    const deleteBug = async () => {
+        if (!window.confirm('Delete this bug permanently?')) {
+            return;
+        }
+
+        setDeleting(true);
+        setDeleteError('');
+
+        try {
+            const response = await fetch(`/api/projects/${project_slug}/bugs/${bug.id}`, {
+                method: 'DELETE',
+                credentials: 'same-origin',
+                headers: { Accept: 'application/json' },
+            });
+
+            if (!response.ok) {
+                const payload = await response.json().catch(() => null);
+                setDeleteError(payload?.message ?? 'The bug could not be deleted.');
+                return;
+            }
+
+            router.visit(`/project/${project_slug}`);
+        } catch {
+            setDeleteError('Could not connect to the server. Please try again.');
+        } finally {
+            setDeleting(false);
+        }
+    };
 
     return (
         <>
@@ -62,9 +92,14 @@ export default function BugPage({ bug: bugResource, project_slug }: BugPageProps
                                         {statusLabels[bug.status]}
                                     </span>
                                     {!showEditForm && (
-                                        <button type="button" onClick={() => setShowEditForm(true)} className="rounded-xl bg-[#9fbea6] px-4 py-2 text-sm font-semibold text-[#233329] transition hover:bg-[#90b198]">
-                                            Edit bug
-                                        </button>
+                                        <div className="flex items-center gap-2">
+                                            <button type="button" onClick={() => setShowEditForm(true)} className="rounded-xl bg-[#9fbea6] px-4 py-2 text-sm font-semibold text-[#233329] transition hover:bg-[#90b198]">
+                                                Edit bug
+                                            </button>
+                                            <button type="button" onClick={deleteBug} disabled={deleting} className="rounded-xl border border-[#efd4ce] bg-[#fffaf8] px-4 py-2 text-sm font-semibold text-[#a45e51] transition hover:bg-[#f8e9e5] disabled:cursor-not-allowed disabled:opacity-60">
+                                                {deleting ? 'Deleting…' : 'Delete'}
+                                            </button>
+                                        </div>
                                     )}
                                 </div>
                             </div>
@@ -72,6 +107,8 @@ export default function BugPage({ bug: bugResource, project_slug }: BugPageProps
                             {bug.technology && (
                                 <p className="mt-4 text-sm font-medium text-[#78917e]">{bug.technology}</p>
                             )}
+
+                            {deleteError && <p className="mt-5 rounded-xl bg-[#f8e9e5] px-4 py-3 text-sm text-[#a45e51]">{deleteError}</p>}
 
                             {showEditForm ? (
                                 <div className="mt-8">
